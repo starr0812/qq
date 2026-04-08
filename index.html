@@ -2,7 +2,7 @@
 <html lang="zh-CN" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>周术琼 | Global Mindset & AI Frontier</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&family=JetBrains+Mono&display=swap" rel="stylesheet">
@@ -18,6 +18,7 @@
             color: var(--text-main);
             overflow-x: hidden;
             background-color: transparent; 
+            -webkit-tap-highlight-color: transparent; /* 移除手机端点击高亮 */
         }
 
         .serif { font-family: 'Playfair Display', "Noto Serif SC", serif; }
@@ -44,7 +45,6 @@
             100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.4; }
         }
 
-        /* 浮动动画 */
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
@@ -71,20 +71,23 @@
         .spc-2 { transform: translate(40px, -15px) rotate(11deg); opacity: 0.6; z-index: 10; }
         .spc-3 { transform: translate(-10px, -35px) rotate(-5deg); opacity: 0.4; z-index: 5; }
 
-        #hero-photo-stack:hover .spc-1 { transform: translate(-210px, -30px) rotate(-16deg); opacity: 1; }
-        #hero-photo-stack:hover .spc-2 { transform: translate(200px, -70px) rotate(20deg); opacity: 1; }
-        #hero-photo-stack:hover .spc-3 { transform: translate(20px, -230px) rotate(6deg); opacity: 1; }
+        /* 兼容 PC 悬停与移动端点击触发 */
+        #hero-photo-stack:hover .spc-1, #hero-photo-stack.is-flipped .spc-1 { transform: translate(-210px, -10px) rotate(-16deg); opacity: 1; }
+        #hero-photo-stack:hover .spc-2, #hero-photo-stack.is-flipped .spc-2 { transform: translate(200px, -40px) rotate(20deg); opacity: 1; }
+        #hero-photo-stack:hover .spc-3, #hero-photo-stack.is-flipped .spc-3 { transform: translate(20px, -160px) rotate(6deg); opacity: 1; }
 
         /* --- 作品堆叠翻页通用效果 --- */
         .slide-card {
             transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .stack-trigger:hover .slide-top {
+        .stack-trigger:hover .slide-top,
+        .stack-trigger.is-flipped .slide-top {
             transform: translate(40px, -40px) rotate(5deg);
             opacity: 0.3;
             filter: blur(2px);
         }
-        .stack-trigger:hover .slide-bottom {
+        .stack-trigger:hover .slide-bottom,
+        .stack-trigger.is-flipped .slide-bottom {
             transform: scale(1.02);
             z-index: 40;
         }
@@ -106,7 +109,25 @@
         .is-popped .eb-3 { opacity: 1; transform: translate(calc(-50% - 130px), calc(-50% + 105px)) scale(1) rotate(-4deg); transition-delay: 0.1s; }
         .is-popped .eb-4 { opacity: 1; transform: translate(calc(-50% + 145px), calc(-50% + 115px)) scale(1) rotate(6deg); transition-delay: 0.15s; }
 
-        @keyframes blink { 50% { opacity: 0; } }
+        /* ====== 移动端专属适配 ====== */
+        @media (max-width: 768px) {
+            /* 调整首屏照片弹开距离防止溢出屏幕 */
+            #hero-photo-stack:hover .spc-1, #hero-photo-stack.is-flipped .spc-1 { transform: translate(-100px, 0px) rotate(-12deg); opacity: 1; }
+            #hero-photo-stack:hover .spc-2, #hero-photo-stack.is-flipped .spc-2 { transform: translate(110px, -10px) rotate(15deg); opacity: 1; }
+            #hero-photo-stack:hover .spc-3, #hero-photo-stack.is-flipped .spc-3 { transform: translate(10px, -90px) rotate(6deg); opacity: 1; }
+
+            /* 调整作品堆叠滑动距离 */
+            .stack-trigger:hover .slide-top,
+            .stack-trigger.is-flipped .slide-top {
+                transform: translate(20px, -20px) rotate(3deg);
+            }
+
+            /* 缩小彩蛋气泡展开范围，以免超出手机屏幕边界 */
+            .is-popped .eb-1 { transform: translate(calc(-50% - 80px), calc(-50% - 90px)) scale(0.85) rotate(-6deg); }
+            .is-popped .eb-2 { transform: translate(calc(-50% + 80px), calc(-50% - 100px)) scale(0.85) rotate(8deg); }
+            .is-popped .eb-3 { transform: translate(calc(-50% - 70px), calc(-50% + 90px)) scale(0.85) rotate(-4deg); }
+            .is-popped .eb-4 { transform: translate(calc(-50% + 70px), calc(-50% + 100px)) scale(0.85) rotate(6deg); }
+        }
     </style>
 </head>
 <body class="overflow-hidden">
@@ -137,46 +158,69 @@
         </div>
     </div>
 
-    <!-- 2. 导航栏 -->
+    <!-- 2. 导航栏 (含移动端汉堡菜单) -->
     <nav class="fixed top-0 w-full z-50 glass border-b border-white/40 shadow-[0_4px_30px_rgba(0,0,0,0.02)]">
         <div class="max-w-[1200px] mx-auto px-6 h-20 flex items-center justify-between">
             <div class="serif text-2xl font-bold tracking-tight cursor-pointer" onclick="window.scrollTo(0,0)">Zhou</div>
-            <div class="hidden lg:flex items-center space-x-10 text-sm font-medium text-gray-600">
+            <!-- PC 导航 -->
+            <div class="hidden md:flex items-center space-x-10 text-sm font-medium text-gray-600">
                 <a href="#aigc" class="hover:text-black transition-colors">AIGC 视觉</a>
                 <a href="#articles" class="hover:text-black transition-colors">个人文章</a>
                 <a href="#projects" class="hover:text-black transition-colors">项目经验</a>
                 <a href="#resume" class="hover:text-black transition-colors">关于我</a>
             </div>
-            <div class="flex items-center space-x-4">
-                <div class="bg-white/50 backdrop-blur-sm p-1 rounded-full flex items-center text-xs font-bold border border-white/60 shadow-sm">
+            <!-- 右侧工具 -->
+            <div class="flex items-center space-x-3 md:space-x-4">
+                <div class="bg-white/50 backdrop-blur-sm p-1 rounded-full hidden sm:flex items-center text-xs font-bold border border-white/60 shadow-sm">
                     <span class="px-3 py-1 text-gray-400">EN</span>
                     <span class="px-3 py-1 bg-white rounded-full shadow-sm text-black">中</span>
                 </div>
+                <!-- 移动端汉堡按钮 -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-full bg-white/50 border border-white/60 shadow-sm text-gray-700 hover:bg-white transition-colors">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
             </div>
         </div>
     </nav>
 
+    <!-- 移动端全屏菜单 -->
+    <div id="mobile-menu" class="fixed inset-0 z-[60] bg-white/95 backdrop-blur-xl flex-col items-center justify-center space-y-10 hidden opacity-0 transition-opacity duration-300">
+        <button id="mobile-menu-close" class="absolute top-6 right-6 p-3 bg-gray-100 rounded-full text-gray-600 active:scale-95 transition-transform">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+        <a href="#aigc" class="mobile-link serif text-3xl font-bold text-gray-800 tracking-wider">AIGC 视觉</a>
+        <a href="#articles" class="mobile-link serif text-3xl font-bold text-gray-800 tracking-wider">个人文章</a>
+        <a href="#projects" class="mobile-link serif text-3xl font-bold text-gray-800 tracking-wider">项目经验</a>
+        <a href="#resume" class="mobile-link serif text-3xl font-bold text-gray-800 tracking-wider">关于我</a>
+        <div class="absolute bottom-12 flex space-x-4 text-xs font-bold text-gray-400">
+            <span class="px-4 py-2 border border-gray-200 rounded-full">ZH</span>
+            <span class="px-4 py-2 border border-gray-200 rounded-full">EN</span>
+        </div>
+    </div>
+
     <main class="max-w-[1200px] mx-auto px-6 relative z-10">
         
         <!-- 3. 首屏 (Hero Section) -->
-        <section class="pt-[220px] md:pt-[280px] pb-[100px] grid md:grid-cols-2 gap-12 items-start min-h-screen">
-            <div class="space-y-10 mt-6 md:mt-12">
-                <div class="space-y-3 text-left">
-                    <p class="text-xl text-gray-500 font-light tracking-wide">嗨，我是</p>
-                    <h1 class="serif text-8xl md:text-9xl font-bold leading-none">周术琼</h1>
+        <section class="pt-[140px] md:pt-[280px] pb-[80px] md:pb-[100px] grid md:grid-cols-2 gap-12 md:gap-12 items-start md:min-h-screen">
+            <div class="space-y-6 md:space-y-10 mt-2 md:mt-12 text-center md:text-left flex flex-col items-center md:items-start">
+                <div class="space-y-2 md:space-y-3">
+                    <p class="text-lg md:text-xl text-gray-500 font-light tracking-wide">嗨，我是</p>
+                    <!-- 缩小移动端标题字号以防溢出 -->
+                    <h1 class="serif text-6xl sm:text-7xl md:text-9xl font-bold leading-none">周术琼</h1>
                 </div>
-                <h2 class="text-lg md:text-xl leading-relaxed text-gray-700 font-light max-w-lg text-left">
+                <h2 class="text-base sm:text-lg md:text-xl leading-relaxed text-gray-700 font-light max-w-lg">
                     这里收藏着我的<span class="font-semibold underline decoration-blue-200 decoration-2 underline-offset-4">奇思妙想</span>、<span class="font-semibold underline decoration-purple-200 decoration-2 underline-offset-4">未完待续的生活</span>，以及偶尔<span class="font-semibold underline decoration-green-200 decoration-2 underline-offset-4">天马行空的脑洞</span>。
                 </h2>
-                <div class="flex items-center pt-6">
-                    <a href="#resume" class="bg-black text-white px-10 py-4 rounded-full font-medium hover:bg-gray-800 transition-all flex items-center shadow-lg shadow-black/10 hover:-translate-y-0.5">
+                <div class="pt-4 md:pt-6">
+                    <a href="#resume" class="bg-black text-white px-8 md:px-10 py-3.5 md:py-4 rounded-full text-sm md:text-base font-medium hover:bg-gray-800 transition-all flex items-center shadow-lg shadow-black/10 active:scale-95 md:hover:-translate-y-0.5">
                         查看简历 <i data-lucide="arrow-right" class="ml-2 w-4 h-4"></i>
                     </a>
                 </div>
             </div>
             
-            <div class="relative flex justify-center items-start h-full mt-16 md:mt-14">
-                <div id="hero-photo-stack" class="relative w-72 h-96 group">
+            <div class="relative flex justify-center items-start h-full mt-16 md:mt-24">
+                <!-- 调整手机端照片堆叠的尺寸 -->
+                <div id="hero-photo-stack" class="relative w-56 h-72 sm:w-64 sm:h-80 md:w-72 md:h-96 group cursor-pointer md:cursor-auto">
                     <div class="photo-stack-card spc-3 absolute inset-0 bg-white border border-white shadow-md rounded-2xl overflow-hidden">
                         <img src="images/Photo-4.png" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/800x1200/e2e8f0/64748b?text=Snapshot+IV'">
                     </div>
@@ -186,38 +230,45 @@
                     <div class="photo-stack-card spc-1 absolute inset-0 bg-white border border-white shadow-md rounded-2xl overflow-hidden">
                         <img src="images/Photo-2.png" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/800x1200/f8fafc/cbd5e1?text=Snapshot+II'">
                     </div>
-                    <div class="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl floating ring-1 ring-black/5 z-30 transition-all duration-500 group-hover:scale-[1.03]">
+                    <div class="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl floating ring-1 ring-black/5 z-30 transition-all duration-500 md:group-hover:scale-[1.03]">
                         <img src="images/Photo-1.png" alt="周术琼" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/800x1200/eeeeee/999999?text=Snapshot+I'">
                         <div class="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none"></div>
                     </div>
-                    <div class="absolute -bottom-16 left-1/2 -translate-x-1/2 opacity-30 group-hover:opacity-0 transition-opacity text-[10px] font-bold tracking-[0.4em] uppercase text-gray-500 whitespace-nowrap">Hover to Flip</div>
+                    <!-- 提示文字针对移动端/PC不同文案 -->
+                    <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 opacity-0 md:opacity-30 md:group-hover:opacity-0 transition-opacity text-[10px] font-bold tracking-[0.4em] uppercase text-gray-500 whitespace-nowrap hidden md:block">Hover to Flip</div>
+                    <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 opacity-50 group-[.is-flipped]:opacity-0 transition-opacity text-[10px] font-bold tracking-[0.4em] uppercase text-gray-500 whitespace-nowrap block md:hidden">Tap to Flip</div>
                 </div>
             </div>
         </section>
 
         <!-- 4. AIGC 画廊 -->
-        <section id="aigc" class="py-[100px] md:py-[150px] space-y-32 border-t border-gray-200/50">
-            <div class="text-center space-y-6 mb-24">
-                <span class="inline-block px-4 py-1 bg-white/80 backdrop-blur-md border border-white rounded-full text-xs font-bold tracking-widest text-gray-500 uppercase shadow-sm">AIGC Gallery</span>
-                <h3 class="serif text-5xl md:text-6xl font-bold">奇思妙想的具象化</h3>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed font-light text-center">
+        <!-- 缩小手机端 y 轴 padding -->
+        <section id="aigc" class="py-[80px] md:py-[150px] space-y-24 md:space-y-32 border-t border-gray-200/50">
+            <div class="text-center space-y-4 md:space-y-6 mb-16 md:mb-24">
+                <span class="inline-block px-4 py-1 bg-white/80 backdrop-blur-md border border-white rounded-full text-[10px] md:text-xs font-bold tracking-widest text-gray-500 uppercase shadow-sm">AIGC Gallery</span>
+                <h3 class="serif text-4xl sm:text-5xl md:text-6xl font-bold">奇思妙想的具象化</h3>
+                <p class="text-sm md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed font-light text-center px-4">
                     不再局限于文字的讲述，我使用 Seedance2.0 与 NanoBanana 等生成式 AI 工具，将脑海中天马行空的灵感转化为触手可及的视觉艺术。
                 </p>
             </div>
 
             <!-- 作品 1：阿玛尼 -->
-            <div class="grid md:grid-cols-12 gap-12 lg:gap-16 items-center">
+            <div class="grid md:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
+                <!-- 手机端图片统一在上 (默认 order-1) -->
                 <div class="md:col-span-7 relative group stack-trigger" id="armani-stack">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-green-100/50 to-blue-100/50 rounded-3xl transform -rotate-2 scale-105 -z-10 backdrop-blur-sm border border-white/60"></div>
-                    <div class="relative rounded-3xl shadow-xl aspect-[4/3] ring-1 ring-black/5 overflow-hidden cursor-pointer">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-green-100/50 to-blue-100/50 rounded-2xl md:rounded-3xl transform -rotate-2 scale-105 -z-10 backdrop-blur-sm border border-white/60"></div>
+                    <div class="relative rounded-2xl md:rounded-3xl shadow-xl aspect-[4/3] ring-1 ring-black/5 overflow-hidden cursor-pointer">
                         <img src="images/ARMANI-S.png" class="slide-card slide-bottom absolute inset-0 w-full h-full object-cover z-10" onerror="this.src='https://placehold.co/1200x900/f1f5f9/94a3b8?text=Armani+S'">
-                        <img src="images/ARMANI-F.png" class="slide-card slide-top relative w-full h-full object-cover z-20 shadow-2xl" onerror="this.src='https://placehold.co/1200x900/eeeeee/999999?text=Armani+F'">
-                        <div class="absolute bottom-4 right-4 z-30 opacity-60 text-[10px] font-bold text-gray-400 bg-white/80 px-2 py-1 rounded flex items-center"><i data-lucide="mouse-pointer-2" class="w-3 h-3 mr-1"></i> HOVER TO FLIP</div>
+                        <img src="images/ARMANI-F.png" class="slide-card slide-top relative w-full h-full object-cover z-20 shadow-xl md:shadow-2xl" onerror="this.src='https://placehold.co/1200x900/eeeeee/999999?text=Armani+F'">
+                        <!-- PC 提示 -->
+                        <div class="absolute bottom-3 right-3 z-30 opacity-70 text-[10px] font-bold text-gray-500 bg-white/90 px-2 py-1 rounded hidden md:flex items-center shadow-sm"><i data-lucide="mouse-pointer-2" class="w-3 h-3 mr-1"></i> HOVER TO FLIP</div>
+                        <!-- 移动端提示 -->
+                        <div class="absolute bottom-3 right-3 z-30 opacity-80 text-[10px] font-bold text-gray-500 bg-white/90 px-2 py-1 rounded flex md:hidden items-center shadow-sm"><i data-lucide="touchpad" class="w-3 h-3 mr-1"></i> TAP TO FLIP</div>
                     </div>
                 </div>
-                <div class="md:col-span-5 space-y-8 text-left">
-                    <h4 class="serif text-3xl md:text-4xl font-bold leading-tight text-gray-900">空灵东方：<br>阿玛尼玉龙茶香</h4>
-                    <div class="space-y-4 text-gray-600 leading-relaxed text-base">
+                <div class="md:col-span-5 space-y-4 md:space-y-8 text-left">
+                    <h4 class="serif text-2xl md:text-4xl font-bold leading-tight text-gray-900">空灵东方：<br class="hidden md:block">阿玛尼玉龙茶香</h4>
+                    <div class="space-y-3 md:space-y-4 text-gray-600 leading-relaxed text-sm md:text-base">
                         <p><strong class="text-gray-900">💡 灵感来源：</strong><br>以“雨后茶山，玉龙清韵”为核心意象，打破传统商业棚拍的物理边界。将阿玛尼高定私藏香水置身于云雾缭绕的东方茶园与禅意水景中，传递出空灵、清新的东方木质香调故事。</p>
                         <p><strong class="text-gray-900">🎨 AI创作过程：</strong><br>运用 NanoBanana 调控丁达尔光效与微距水波，强化玻璃瓶身的物理折射感。后期利用局部重绘精准还原黑石瓶盖质感与烫金铭牌，实现自然诗意与高定奢华的完美融合。</p>
                     </div>
@@ -225,35 +276,37 @@
             </div>
 
             <!-- 作品 2：动态视频 -->
-            <div class="grid md:grid-cols-12 gap-12 lg:gap-16 items-center mt-24">
-                <div class="md:col-span-5 order-2 md:order-1 space-y-8 text-left">
-                    <h4 class="serif text-3xl md:text-4xl font-bold leading-tight text-gray-900">动态演绎：<br>光影流转间的茶香诗意</h4>
-                    <div class="space-y-4 text-gray-600 leading-relaxed text-base">
+            <div class="grid md:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
+                <!-- 手机端强行将文字拉到下方 (order-2) -->
+                <div class="md:col-span-5 order-2 md:order-1 space-y-4 md:space-y-8 text-left">
+                    <h4 class="serif text-2xl md:text-4xl font-bold leading-tight text-gray-900">动态演绎：<br class="hidden md:block">光影流转间的茶香诗意</h4>
+                    <div class="space-y-3 md:space-y-4 text-gray-600 leading-relaxed text-sm md:text-base">
                         <p><strong class="text-gray-900">💡 镜头语言：</strong><br>将静态的视觉重构升级为动态的感官体验。视频通过模拟微距镜头下的水波流转与晨曦光影，赋予了香水瓶生动的生命力，让观者仿佛能真切嗅到山泉与清茶交织的香气。</p>
                         <p><strong class="text-gray-900">🎬 AI动态控制：</strong><br>利用前沿的 AI 视频生成大模型，将静态概念图延展为真实的自然影像。核心操作在于精确控制泉水流动的物理动态规律，以及树影斑驳的自然闪烁节奏，最终打造出极具沉浸感的商业级动态大片。</p>
                     </div>
                 </div>
-                <div class="md:col-span-7 md:order-2 relative group">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-green-100/50 to-yellow-100/50 rounded-3xl transform rotate-2 scale-105 transition-transform duration-500 group-hover:rotate-0 -z-10 backdrop-blur-sm border border-white/60"></div>
-                    <div class="relative rounded-3xl overflow-hidden shadow-xl aspect-video bg-gray-100 flex items-center justify-center">
-                        <video src="images/ARMANI-V.mp4" poster="images/ARMANI-F.png" autoplay loop muted playsinline class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"></video>
+                <div class="md:col-span-7 order-1 md:order-2 relative group">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-green-100/50 to-yellow-100/50 rounded-2xl md:rounded-3xl transform rotate-2 scale-105 transition-transform duration-500 group-hover:rotate-0 -z-10 backdrop-blur-sm border border-white/60"></div>
+                    <div class="relative rounded-2xl md:rounded-3xl overflow-hidden shadow-xl aspect-video bg-gray-100 flex items-center justify-center">
+                        <video src="images/ARMANI-V.mp4" poster="images/ARMANI-F.png" autoplay loop muted playsinline class="w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-105"></video>
                     </div>
                 </div>
             </div>
 
             <!-- 作品 3：Kumo 潮玩 -->
-            <div class="grid md:grid-cols-12 gap-12 lg:gap-16 items-center mt-24">
+            <div class="grid md:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
                 <div class="md:col-span-7 relative group stack-trigger" id="kumo-stack">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-purple-100/50 to-pink-100/50 rounded-3xl transform -rotate-2 scale-105 -z-10 backdrop-blur-sm border border-white/60"></div>
-                    <div class="relative rounded-3xl shadow-xl aspect-[4/3] ring-1 ring-black/5 overflow-hidden cursor-pointer">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-purple-100/50 to-pink-100/50 rounded-2xl md:rounded-3xl transform -rotate-2 scale-105 -z-10 backdrop-blur-sm border border-white/60"></div>
+                    <div class="relative rounded-2xl md:rounded-3xl shadow-xl aspect-[4/3] ring-1 ring-black/5 overflow-hidden cursor-pointer">
                         <img src="images/Kumo-2.png" class="slide-card slide-bottom absolute inset-0 w-full h-full object-cover z-10" onerror="this.src='https://placehold.co/1200x900/f5f3ff/a78bfa?text=Kumo+S'">
-                        <img src="images/Kumo-1.png" class="slide-card slide-top relative w-full h-full object-cover z-20 shadow-2xl" onerror="this.src='https://placehold.co/1200x900/fef2f2/f87171?text=Kumo+F'">
-                        <div class="absolute bottom-4 right-4 z-30 opacity-60 text-[10px] font-bold text-gray-400 bg-white/80 px-2 py-1 rounded flex items-center"><i data-lucide="mouse-pointer-2" class="w-3 h-3 mr-1"></i> HOVER TO FLIP</div>
+                        <img src="images/Kumo-1.png" class="slide-card slide-top relative w-full h-full object-cover z-20 shadow-xl md:shadow-2xl" onerror="this.src='https://placehold.co/1200x900/fef2f2/f87171?text=Kumo+F'">
+                        <div class="absolute bottom-3 right-3 z-30 opacity-70 text-[10px] font-bold text-gray-500 bg-white/90 px-2 py-1 rounded hidden md:flex items-center shadow-sm"><i data-lucide="mouse-pointer-2" class="w-3 h-3 mr-1"></i> HOVER TO FLIP</div>
+                        <div class="absolute bottom-3 right-3 z-30 opacity-80 text-[10px] font-bold text-gray-500 bg-white/90 px-2 py-1 rounded flex md:hidden items-center shadow-sm"><i data-lucide="touchpad" class="w-3 h-3 mr-1"></i> TAP TO FLIP</div>
                     </div>
                 </div>
-                <div class="md:col-span-5 space-y-8 text-left">
-                    <h4 class="serif text-3xl md:text-4xl font-bold leading-tight text-gray-900">梦境守望者：<br>潮玩 IP Kumo 诞生记</h4>
-                    <div class="space-y-4 text-gray-600 leading-relaxed text-base">
+                <div class="md:col-span-5 space-y-4 md:space-y-8 text-left">
+                    <h4 class="serif text-2xl md:text-4xl font-bold leading-tight text-gray-900">梦境守望者：<br class="hidden md:block">潮玩 IP Kumo 诞生记</h4>
+                    <div class="space-y-3 md:space-y-4 text-gray-600 leading-relaxed text-sm md:text-base">
                         <p><strong class="text-gray-900">💡 灵感来源：</strong><br>“Kumo”在日语中意为“云”，被设定为一位漫游在极光与星海之间的星际牧羊人。结合当下年轻人喜爱的盲盒潮玩美学，将治愈系的马卡龙色彩与宇宙星象元素相融合，打造一个能给快节奏现代生活带来慰藉的温暖 IP 形象。</p>
                         <p><strong class="text-gray-900">🎨 AI创作过程：</strong><br>使用 AI 深度探索 3D 渲染与材质表现。通过 Prompt 精确控制“盲盒质感”与“搪胶玩具”属性，完美呈现角色的微透肤感、头发的珠光渐变以及底座剔透的水晶质感。辅以柔和光照，构建出极致细腻的商业级视觉。</p>
                     </div>
@@ -261,35 +314,36 @@
             </div>
 
             <!-- 作品 4：方特海报 -->
-            <div class="grid md:grid-cols-12 gap-12 lg:gap-16 items-center mt-24">
-                <div class="md:col-span-5 order-2 md:order-1 space-y-8 text-left">
-                    <h4 class="serif text-3xl md:text-4xl font-bold leading-tight text-gray-900">盛夏狂欢：<br>方特夏日乐园 KV 海报</h4>
-                    <div class="space-y-4 text-gray-600 leading-relaxed text-base">
+            <div class="grid md:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
+                <div class="md:col-span-5 order-2 md:order-1 space-y-4 md:space-y-8 text-left">
+                    <h4 class="serif text-2xl md:text-4xl font-bold leading-tight text-gray-900">盛夏狂欢：<br class="hidden md:block">方特夏日乐园 KV 海报</h4>
+                    <div class="space-y-3 md:space-y-4 text-gray-600 leading-relaxed text-sm md:text-base">
                         <p><strong class="text-gray-900">💡 灵感来源：</strong><br>围绕“夏日清凉”与“全家狂欢”的核心诉求，将方特东方神话的标志性古建与惊险的现代过山车巧妙同框。画面融入了锦鲤浮排、水上嬉戏以及国民级 IP《熊出没》元素，打造色彩明快、充满童趣的夏日游乐乌托邦。</p>
                         <p><strong class="text-gray-900">🎨 AI创作过程：</strong><br>挑战高难度的商业级大场景与多元素融合。通过底层空间控制网络确保古建与水景的透视比例精准。运用精细的 Prompt 调控全局光照，输出具有统一 3D 皮克斯级质感的高精度主视觉海报。</p>
                     </div>
                 </div>
-                <div class="md:col-span-7 md:order-2 relative group">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-cyan-100/50 to-blue-100/50 rounded-3xl transform rotate-2 scale-105 transition-transform duration-500 group-hover:rotate-0 -z-10 backdrop-blur-sm border border-white/60"></div>
-                    <div class="relative rounded-3xl overflow-hidden shadow-xl aspect-video">
-                        <img src="images/FTon.png" alt="Fantawild AIGC" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" onerror="this.src='https://placehold.co/1920x1080/eeeeee/999999?text=Fantawild+AIGC'">
+                <div class="md:col-span-7 order-1 md:order-2 relative group">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-cyan-100/50 to-blue-100/50 rounded-2xl md:rounded-3xl transform rotate-2 scale-105 transition-transform duration-500 group-hover:rotate-0 -z-10 backdrop-blur-sm border border-white/60"></div>
+                    <div class="relative rounded-2xl md:rounded-3xl overflow-hidden shadow-xl aspect-video">
+                        <img src="images/FTon.png" alt="Fantawild AIGC" class="w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-105" onerror="this.src='https://placehold.co/1920x1080/eeeeee/999999?text=Fantawild+AIGC'">
                     </div>
                 </div>
             </div>
 
             <!-- 作品 5：信阳文旅 -->
-            <div class="grid md:grid-cols-12 gap-12 lg:gap-16 items-center mt-24">
+            <div class="grid md:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
                 <div class="md:col-span-7 relative group stack-trigger" id="xinyang-stack">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-green-100/50 to-teal-100/50 rounded-3xl transform -rotate-2 scale-105 -z-10 backdrop-blur-sm border border-white/60"></div>
-                    <div class="relative rounded-3xl shadow-xl aspect-video ring-1 ring-black/5 overflow-hidden cursor-pointer">
-                        <img src="images/XinYang-2.png" class="slide-card slide-bottom absolute inset-0 w-full h-full object-cover z-10" onerror="this.src='https://placehold.co/1920x1080/f0fdf4/16a34a?text=XinYang+S'">
-                        <img src="images/XinYang-1.png" class="slide-card slide-top relative w-full h-full object-cover z-20 shadow-2xl" onerror="this.src='https://placehold.co/1920x1080/ecfdf5/10b981?text=XinYang+F'">
-                        <div class="absolute bottom-4 right-4 z-30 opacity-60 text-[10px] font-bold text-gray-400 bg-white/80 px-2 py-1 rounded flex items-center"><i data-lucide="mouse-pointer-2" class="w-3 h-3 mr-1"></i> HOVER TO FLIP</div>
+                    <div class="absolute inset-0 bg-gradient-to-tr from-green-100/50 to-teal-100/50 rounded-2xl md:rounded-3xl transform -rotate-2 scale-105 -z-10 backdrop-blur-sm border border-white/60"></div>
+                    <div class="relative rounded-2xl md:rounded-3xl shadow-xl aspect-[3/2] ring-1 ring-black/5 overflow-hidden cursor-pointer">
+                        <img src="images/XinYang-2.png" class="slide-card slide-bottom absolute inset-0 w-full h-full object-cover z-10" onerror="this.src='https://placehold.co/1200x800/f0fdf4/16a34a?text=XinYang+S'">
+                        <img src="images/XinYang-1.png" class="slide-card slide-top relative w-full h-full object-cover z-20 shadow-xl md:shadow-2xl" onerror="this.src='https://placehold.co/1200x800/ecfdf5/10b981?text=XinYang+F'">
+                        <div class="absolute bottom-3 right-3 z-30 opacity-70 text-[10px] font-bold text-gray-500 bg-white/90 px-2 py-1 rounded hidden md:flex items-center shadow-sm"><i data-lucide="mouse-pointer-2" class="w-3 h-3 mr-1"></i> HOVER TO FLIP</div>
+                        <div class="absolute bottom-3 right-3 z-30 opacity-80 text-[10px] font-bold text-gray-500 bg-white/90 px-2 py-1 rounded flex md:hidden items-center shadow-sm"><i data-lucide="touchpad" class="w-3 h-3 mr-1"></i> TAP TO FLIP</div>
                     </div>
                 </div>
-                <div class="md:col-span-5 space-y-8 text-left">
-                    <h4 class="serif text-3xl md:text-4xl font-bold leading-tight">豫见信阳：<br>数字文旅插画</h4>
-                    <div class="space-y-4 text-gray-600 leading-relaxed text-base">
+                <div class="md:col-span-5 space-y-4 md:space-y-8 text-left">
+                    <h4 class="serif text-2xl md:text-4xl font-bold leading-tight">豫见信阳：<br class="hidden md:block">数字文旅插画</h4>
+                    <div class="space-y-3 md:space-y-4 text-gray-600 leading-relaxed text-sm md:text-base">
                         <p><strong class="text-gray-900">💡 灵感来源：</strong><br>采用二次元萌系插画风格，结合“云旅游”手机数字视窗概念。将信阳毛尖茶乡、南湾湖、鸡公山等核心地标与非遗文化，通过悬浮视窗的形式展现，打造亲切可爱的虚拟文旅导游。</p>
                         <p><strong class="text-gray-900">🎨 AI创作过程：</strong><br>探索矢量插画与 UI 视觉融合。通过 Prompt 设定统一的粗线勾勒与明快调色板，确保多个景区元素能在同框时保持强烈的视觉统一性，巧妙植入 UI 控件与信息气泡，完成兼具趣味与信息传达的商业插画。</p>
                     </div>
@@ -298,166 +352,189 @@
         </section>
 
         <!-- 5. 个人文章 -->
-        <section id="articles" class="py-[100px] md:py-[150px] space-y-16 border-t border-gray-200/50">
-            <div class="text-center space-y-6">
-                <span class="inline-block px-4 py-1 bg-white/80 backdrop-blur-md border border-white rounded-full text-xs font-bold tracking-widest text-gray-500 uppercase shadow-sm">Writings</span>
-                <h3 class="serif text-5xl md:text-6xl font-bold">思考与沉淀</h3>
+        <section id="articles" class="py-[80px] md:py-[150px] space-y-10 md:space-y-16 border-t border-gray-200/50">
+            <div class="text-center space-y-4 md:space-y-6">
+                <span class="inline-block px-4 py-1 bg-white/80 backdrop-blur-md border border-white rounded-full text-[10px] md:text-xs font-bold tracking-widest text-gray-500 uppercase shadow-sm">Writings</span>
+                <h3 class="serif text-4xl sm:text-5xl md:text-6xl font-bold">思考与沉淀</h3>
             </div>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
-                <a href="https://www.woshipm.com/ai/6369815.html" target="_blank" class="group relative bg-white/40 backdrop-blur-md border border-white/60 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 block cursor-pointer">
-                    <div class="p-8 space-y-5">
-                        <div class="text-xs text-blue-500 font-mono tracking-wider font-bold uppercase">Tech Analysis</div>
-                        <h4 class="serif text-2xl font-bold leading-snug group-hover:text-blue-600 transition-colors">破解 Claude Code 的“记忆宫殿”</h4>
-                        <p class="text-gray-600 text-sm leading-relaxed line-clamp-6">从 Anthropic 泄露的源码中，深度解析 Claude 独特的“三层记忆”系统，探讨它如何像人类一样高效管理对话上下文，并总结出提升 AI 协作的实用技巧。深入反思大模型在长文本处理中的逻辑黑盒与状态控制，探讨模型如何在高频交互中维持逻辑的连续性。</p>
-                        <div class="pt-4 flex items-center text-sm font-bold text-gray-900 group-hover:text-blue-600">阅读全文 <i data-lucide="arrow-right" class="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i></div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 text-left">
+                <!-- 卡片在手机端内边距稍微调小 -->
+                <a href="https://www.woshipm.com/ai/6369815.html" target="_blank" class="group relative bg-white/40 backdrop-blur-md border border-white/60 rounded-[1.5rem] md:rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 md:hover:-translate-y-1 block cursor-pointer">
+                    <div class="p-6 md:p-8 space-y-4 md:space-y-5">
+                        <div class="text-[10px] md:text-xs text-blue-500 font-mono tracking-wider font-bold uppercase">Tech Analysis</div>
+                        <h4 class="serif text-xl md:text-2xl font-bold leading-snug group-hover:text-blue-600 transition-colors">破解 Claude Code 的“记忆宫殿”</h4>
+                        <p class="text-gray-600 text-sm leading-relaxed line-clamp-4 md:line-clamp-6">从 Anthropic 泄露的源码中，深度解析 Claude 独特的“三层记忆”系统，探讨它如何像人类一样高效管理对话上下文，并总结出提升 AI 协作的实用技巧。深入反思大模型在长文本处理中的逻辑黑盒与状态控制，探讨模型如何在高频交互中维持逻辑的连续性。</p>
+                        <div class="pt-2 md:pt-4 flex items-center text-sm font-bold text-gray-900 group-hover:text-blue-600">阅读全文 <i data-lucide="arrow-right" class="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i></div>
                     </div>
                 </a>
-                <a href="https://www.woshipm.com/ai/6363971.html" target="_blank" class="group relative bg-white/40 backdrop-blur-md border border-white/60 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 block cursor-pointer">
-                    <div class="p-8 space-y-5">
-                        <div class="text-xs text-purple-500 font-mono tracking-wider font-bold uppercase">Insight</div>
-                        <h4 class="serif text-2xl font-bold leading-snug group-hover:text-purple-600 transition-colors">AI 能写诗，但写不出安慰？</h4>
-                        <p class="text-gray-600 text-sm leading-relaxed line-clamp-6">通过一次“失去宠物”的情感陪伴测试，剖析 AI 在情感计算中的边界。探讨人类在共情、分寸感上的不可替代性。通过多次对话实验，反思 AI 真正的陪伴意义与情感交互中的不可计算性，以及算法如何模拟却无法真正抵达人类感性的最底层触点。</p>
-                        <div class="pt-4 flex items-center text-sm font-bold text-gray-900 group-hover:text-purple-600">阅读全文 <i data-lucide="arrow-right" class="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i></div>
+                <a href="https://www.woshipm.com/ai/6363971.html" target="_blank" class="group relative bg-white/40 backdrop-blur-md border border-white/60 rounded-[1.5rem] md:rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 md:hover:-translate-y-1 block cursor-pointer">
+                    <div class="p-6 md:p-8 space-y-4 md:space-y-5">
+                        <div class="text-[10px] md:text-xs text-purple-500 font-mono tracking-wider font-bold uppercase">Insight</div>
+                        <h4 class="serif text-xl md:text-2xl font-bold leading-snug group-hover:text-purple-600 transition-colors">AI 能写诗，但写不出安慰？</h4>
+                        <p class="text-gray-600 text-sm leading-relaxed line-clamp-4 md:line-clamp-6">通过一次“失去宠物”的情感陪伴测试，剖析 AI 在情感计算中的边界。探讨人类在共情、分寸感上的不可替代性。通过多次对话实验，反思 AI 真正的陪伴意义与情感交互中的不可计算性，以及算法如何模拟却无法真正抵达人类感性的最底层触点。</p>
+                        <div class="pt-2 md:pt-4 flex items-center text-sm font-bold text-gray-900 group-hover:text-purple-600">阅读全文 <i data-lucide="arrow-right" class="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i></div>
                     </div>
                 </a>
-                <a href="https://www.woshipm.com/ai/6363738.html" target="_blank" class="group relative bg-white/40 backdrop-blur-md border border-white/60 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 block cursor-pointer">
-                    <div class="p-8 space-y-5">
-                        <div class="text-xs text-green-500 font-mono tracking-wider font-bold uppercase">Practical Guide</div>
-                        <h4 class="serif text-2xl font-bold leading-snug group-hover:text-green-600 transition-colors">为 Agent 训练出靠谱的 Skills</h4>
-                        <p class="text-gray-600 text-sm leading-relaxed line-clamp-6">告别纸上谈兵，教你通过制定严格的《说明书》、构建正反例训练集以及 A.S.S. 评估标准，为 AI Agent 打造稳定、安全、可落地的专业技能。实战分享如何将模糊的 Prompt 转化为精准的执行能力，并实现闭环迭代与质量监控，确保 Skill 的长效执行。</p>
-                        <div class="pt-4 flex items-center text-sm font-bold text-gray-900 group-hover:text-green-600">阅读全文 <i data-lucide="arrow-right" class="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i></div>
+                <a href="https://www.woshipm.com/ai/6363738.html" target="_blank" class="group relative bg-white/40 backdrop-blur-md border border-white/60 rounded-[1.5rem] md:rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 md:hover:-translate-y-1 block cursor-pointer">
+                    <div class="p-6 md:p-8 space-y-4 md:space-y-5">
+                        <div class="text-[10px] md:text-xs text-green-500 font-mono tracking-wider font-bold uppercase">Practical Guide</div>
+                        <h4 class="serif text-xl md:text-2xl font-bold leading-snug group-hover:text-green-600 transition-colors">为 Agent 训练出靠谱的 Skills</h4>
+                        <p class="text-gray-600 text-sm leading-relaxed line-clamp-4 md:line-clamp-6">告别纸上谈兵，教你通过制定严格的《说明书》、构建正反例训练集以及 A.S.S. 评估标准，为 AI Agent 打造稳定、安全、可落地的专业技能。实战分享如何将模糊的 Prompt 转化为精准的执行能力，并实现闭环迭代与质量监控，确保 Skill 的长效执行。</p>
+                        <div class="pt-2 md:pt-4 flex items-center text-sm font-bold text-gray-900 group-hover:text-green-600">阅读全文 <i data-lucide="arrow-right" class="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i></div>
                     </div>
                 </a>
             </div>
         </section>
 
         <!-- 6. 项目经验 -->
-        <section id="projects" class="py-[100px] md:py-[150px] space-y-16 border-t border-gray-200/50">
-            <div class="text-center space-y-6">
-                <span class="inline-block px-4 py-1 bg-white/80 backdrop-blur-md border border-white rounded-full text-xs font-bold tracking-widest text-gray-500 uppercase shadow-sm">Case Studies</span>
-                <h3 class="serif text-5xl md:text-6xl font-bold">核心项目经验</h3>
+        <section id="projects" class="py-[80px] md:py-[150px] space-y-10 md:space-y-16 border-t border-gray-200/50">
+            <div class="text-center space-y-4 md:space-y-6">
+                <span class="inline-block px-4 py-1 bg-white/80 backdrop-blur-md border border-white rounded-full text-[10px] md:text-xs font-bold tracking-widest text-gray-500 uppercase shadow-sm">Case Studies</span>
+                <h3 class="serif text-4xl sm:text-5xl md:text-6xl font-bold">核心项目经验</h3>
             </div>
-            <div class="grid gap-12 text-left">
-                <div class="group relative glass border border-white/60 rounded-[40px] p-8 md:p-12 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
-                    <div class="absolute right-0 top-0 w-64 h-64 bg-blue-100/30 rounded-full blur-3xl -z-10 opacity-50"></div>
-                    <div class="grid md:grid-cols-12 gap-12 items-center">
-                        <div class="md:col-span-8 space-y-6">
-                            <div class="inline-block px-4 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Agent 评测与闭环</div>
-                            <h4 class="serif text-3xl md:text-4xl font-bold text-gray-900 leading-tight">360AI浏览器“网页摘要” Agent 评测项目</h4>
-                            <div class="space-y-4 text-gray-600 leading-relaxed text-base">
+            <div class="grid gap-8 md:gap-12 text-left">
+                <!-- 优化卡片 Padding -->
+                <div class="group relative glass border border-white/60 rounded-[2rem] md:rounded-[40px] p-6 sm:p-8 md:p-12 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
+                    <div class="absolute right-0 top-0 w-48 h-48 md:w-64 md:h-64 bg-blue-100/30 rounded-full blur-3xl -z-10 opacity-50"></div>
+                    <div class="grid md:grid-cols-12 gap-8 md:gap-12 items-center">
+                        <div class="md:col-span-8 space-y-4 md:space-y-6">
+                            <div class="inline-block px-3 md:px-4 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Agent 评测与闭环</div>
+                            <h4 class="serif text-2xl md:text-4xl font-bold text-gray-900 leading-tight">360AI浏览器“网页摘要” Agent 评测项目</h4>
+                            <div class="space-y-3 md:space-y-4 text-gray-600 leading-relaxed text-sm md:text-base">
                                 <p><strong class="text-gray-900">核心背景：</strong>针对 360AI 浏览器“网页摘要” Agent 在处理【教程攻略类】网页场景时，对比评测模型训练前后的任务完成度。</p>
                                 <p><strong class="text-gray-900">核心贡献：</strong>作为项目组长，主导制定了《评测规范 SOP》与 GSB 对比打分法。通过组织复盘分析典型 Bad Case，纠正打分偏差，向算法端输出反馈。最终使任务成功率从 62.5% 飞跃至 <span class="text-blue-600 font-bold">86.3%</span>，精准达成业务评测闭环。</p>
                             </div>
                         </div>
-                        <div class="md:col-span-4 bg-white/60 backdrop-blur-md rounded-3xl p-8 text-center space-y-2 border border-white shadow-sm">
-                            <div class="text-4xl font-bold text-blue-600">+23.8%</div>
-                            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider">任务成功率提升</div>
+                        <div class="md:col-span-4 bg-white/60 backdrop-blur-md rounded-2xl md:rounded-3xl p-6 md:p-8 text-center space-y-2 border border-white shadow-sm">
+                            <div class="text-3xl md:text-4xl font-bold text-blue-600">+23.8%</div>
+                            <div class="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-wider">任务成功率提升</div>
                         </div>
                     </div>
                 </div>
-                <div class="group relative glass border border-white/60 rounded-[40px] p-8 md:p-12 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
-                    <div class="absolute right-0 top-0 w-64 h-64 bg-purple-100/30 rounded-full blur-3xl -z-10 opacity-50"></div>
-                    <div class="grid md:grid-cols-12 gap-12 items-center">
-                        <div class="md:col-span-8 space-y-6">
-                            <div class="inline-block px-4 py-1 bg-purple-50 text-purple-600 rounded-full text-[10px] font-bold uppercase tracking-widest">多模态训练</div>
-                            <h4 class="serif text-3xl md:text-4xl font-bold text-gray-900 leading-tight">360AI浏览器“AI绘图”多模态文生图训练项目</h4>
-                            <div class="space-y-4 text-gray-600 leading-relaxed text-base">
+                <div class="group relative glass border border-white/60 rounded-[2rem] md:rounded-[40px] p-6 sm:p-8 md:p-12 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
+                    <div class="absolute right-0 top-0 w-48 h-48 md:w-64 md:h-64 bg-purple-100/30 rounded-full blur-3xl -z-10 opacity-50"></div>
+                    <div class="grid md:grid-cols-12 gap-8 md:gap-12 items-center">
+                        <div class="md:col-span-8 space-y-4 md:space-y-6">
+                            <div class="inline-block px-3 md:px-4 py-1 bg-purple-50 text-purple-600 rounded-full text-[10px] font-bold uppercase tracking-widest">多模态训练</div>
+                            <h4 class="serif text-2xl md:text-4xl font-bold text-gray-900 leading-tight">360AI浏览器“AI绘图”多模态文生图训练项目</h4>
+                            <div class="space-y-3 md:space-y-4 text-gray-600 leading-relaxed text-sm md:text-base">
                                 <p><strong class="text-gray-900">核心背景：</strong>针对亚洲人像照片生成场景中，解决基础模型对复杂长指令理解较弱、导致生成图“废片率”高的问题。</p>
                                 <p><strong class="text-gray-900">核心贡献：</strong>主导 <span class="text-purple-600 font-bold">4w+</span> 高质量数据集的清洗、结构化标注与质检。统一 Prompt 结构标准，显著提升图像指令遵循度。使严重 Bad Case 发生率下降 20%，质检一次性通过率达 90% 以上。</p>
                             </div>
                         </div>
-                        <div class="md:col-span-4 bg-white/60 backdrop-blur-md rounded-3xl p-8 text-center space-y-2 border border-white shadow-sm">
-                            <div class="text-4xl font-bold text-purple-600">4w+</div>
-                            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider">交付高质量数据</div>
+                        <div class="md:col-span-4 bg-white/60 backdrop-blur-md rounded-2xl md:rounded-3xl p-6 md:p-8 text-center space-y-2 border border-white shadow-sm">
+                            <div class="text-3xl md:text-4xl font-bold text-purple-600">4w+</div>
+                            <div class="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-wider">交付高质量数据</div>
                         </div>
                     </div>
                 </div>
+                
+                <!-- 新增项目3：智能客服SFT训练 -->
+                <div class="group relative glass border border-white/60 rounded-[2rem] md:rounded-[40px] p-6 sm:p-8 md:p-12 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
+                    <div class="absolute right-0 top-0 w-48 h-48 md:w-64 md:h-64 bg-orange-100/30 rounded-full blur-3xl -z-10 opacity-50"></div>
+                    <div class="grid md:grid-cols-12 gap-8 md:gap-12 items-center">
+                        <div class="md:col-span-8 space-y-4 md:space-y-6">
+                            <div class="inline-block px-3 md:px-4 py-1 bg-orange-50 text-orange-600 rounded-full text-[10px] font-bold uppercase tracking-widest">多轮对话 SFT 训练</div>
+                            <h4 class="serif text-2xl md:text-4xl font-bold text-gray-900 leading-tight">3C数码智能客服“多轮对话”训练</h4>
+                            <div class="space-y-3 md:space-y-4 text-gray-600 leading-relaxed text-sm md:text-base">
+                                <p><strong class="text-gray-900">核心背景：</strong>解决智能客服大模型在解答充电宝参数与售后政策时出现的“事实性幻觉”与多轮指代遗忘问题，提升 RAG 检索采纳率与回复拟人度。</p>
+                                <p><strong class="text-gray-900">核心贡献：</strong>负责会话 RAG 检索关联度判断与语料精标改写，主动挖掘并反馈易混淆的深度 Bad Case 以协助优化规则。个人累计交付 <span class="text-orange-600 font-bold">4000+</span> 条长文本多轮对话数据，有效降低上线后的人工转接率。</p>
+                            </div>
+                        </div>
+                        <div class="md:col-span-4 bg-white/60 backdrop-blur-md rounded-2xl md:rounded-3xl p-6 md:p-8 text-center space-y-2 border border-white shadow-sm">
+                            <div class="text-3xl md:text-4xl font-bold text-orange-600">96.5%</div>
+                            <div class="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-wider">个人质检合格率</div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
 
         <!-- 7. 关于我 -->
-        <section id="resume" class="py-[100px] md:py-[150px] space-y-16 border-t border-gray-200/50">
-            <div class="grid md:grid-cols-12 gap-16 items-start text-left">
-                <div class="md:col-span-4 space-y-8 sticky top-32">
-                    <div id="lanyard-zone" class="relative aspect-[3/4] w-full perspective-1000 cursor-grab touch-none select-none overflow-visible">
+        <section id="resume" class="py-[80px] md:py-[150px] space-y-16 border-t border-gray-200/50">
+            <div class="grid md:grid-cols-12 gap-12 md:gap-16 items-start text-left">
+                <!-- 挂绳卡片：移动端限制宽高防止影响滚动，PC 端 sticky -->
+                <div class="md:col-span-4 space-y-8 md:sticky md:top-32 mx-auto md:mx-0 w-full max-w-[280px] md:max-w-none">
+                    <div id="lanyard-zone" class="relative h-[360px] md:h-auto md:aspect-[3/4] w-full perspective-1000 cursor-grab touch-none select-none overflow-visible">
                         <svg class="absolute inset-0 w-full h-full pointer-events-none overflow-visible" style="z-index: 10;"><line id="lanyard-string" stroke="#9ca3af" stroke-width="3" stroke-linecap="round" /></svg>
                         <div id="lanyard-card" class="absolute left-1/2 top-1/2 w-[75%] aspect-[3/4] preserve-3d transition-transform opacity-0" style="z-index: 20; transform: translate(-50%, -50%);">
                             <div class="absolute inset-0 bg-white rounded-2xl shadow-xl backface-hidden border border-gray-200 flex flex-col overflow-hidden">
-                                <div class="h-10 bg-gradient-to-b from-gray-100 to-white flex justify-center items-center relative border-b border-gray-100"><div class="w-10 h-2 bg-gray-300 rounded-full"></div></div>
+                                <div class="h-8 md:h-10 bg-gradient-to-b from-gray-100 to-white flex justify-center items-center relative border-b border-gray-100"><div class="w-8 md:w-10 h-1.5 md:h-2 bg-gray-300 rounded-full"></div></div>
                                 <div class="flex-1 px-2 bg-white"><img src="images/Photo-5.png" alt="Profile" class="w-full h-full object-cover rounded-t-lg" onerror="this.src='https://placehold.co/600x800/eeeeee/999999?text=Profile'"></div>
-                                <div class="h-10 bg-white flex items-center justify-center font-mono font-bold text-gray-800 text-[10px] tracking-[0.2em] uppercase">ZHOU.S.Q</div>
+                                <div class="h-8 md:h-10 bg-white flex items-center justify-center font-mono font-bold text-gray-800 text-[10px] tracking-[0.2em] uppercase">ZHOU.S.Q</div>
                             </div>
                             <div class="absolute inset-0 bg-[#1a1a1a] rounded-2xl shadow-xl backface-hidden border border-gray-700 flex flex-col items-center justify-center text-white" style="transform: rotateY(180deg);">
-                                <i data-lucide="qr-code" class="w-24 h-24 mb-4 text-white/80"></i>
-                                <span class="font-mono text-xs text-gray-400 tracking-widest uppercase">SCAN CONNECT</span>
+                                <i data-lucide="qr-code" class="w-20 h-20 md:w-24 md:h-24 mb-4 text-white/80"></i>
+                                <span class="font-mono text-[10px] md:text-xs text-gray-400 tracking-widest uppercase">SCAN CONNECT</span>
                             </div>
                         </div>
                     </div>
-                    <div class="space-y-4 px-2 pt-6">
-                        <h4 class="serif text-4xl font-bold">周术琼</h4>
-                        <p class="text-gray-500 font-medium text-lg">AI 训练师 / 模型评测</p>
-                        <div class="flex flex-col space-y-3 pt-4 border-t border-gray-200/50 text-sm text-gray-600 font-medium">
-                            <div class="flex items-center"><i data-lucide="mail" class="w-4 h-4 mr-3 text-gray-400"></i> starr_zz0812@163.com</div>
-                            <div class="flex items-center"><i data-lucide="phone" class="w-4 h-4 mr-3 text-gray-400"></i> 158-0072-9442</div>
+                    <div class="space-y-3 px-2 pt-2 md:pt-6 text-center md:text-left">
+                        <h4 class="serif text-3xl md:text-4xl font-bold">周术琼</h4>
+                        <p class="text-gray-500 font-medium text-base md:text-lg">AI 训练师 / 模型评测</p>
+                        <div class="flex flex-col space-y-2 pt-4 border-t border-gray-200/50 text-sm text-gray-600 font-medium items-center md:items-start">
+                            <div class="flex items-center"><i data-lucide="mail" class="w-4 h-4 mr-2 md:mr-3 text-gray-400"></i> starr_zz0812@163.com</div>
+                            <div class="flex items-center"><i data-lucide="phone" class="w-4 h-4 mr-2 md:mr-3 text-gray-400"></i> 158-0072-9442</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="md:col-span-8 space-y-16">
-                    <div class="space-y-8">
-                        <h5 class="serif text-3xl font-bold flex items-center"><i data-lucide="zap" class="w-8 h-8 mr-4 text-yellow-500"></i> 个人优势</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600 leading-relaxed">
-                            <div class="p-8 glass border border-white/60 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-                                <strong class="text-gray-900 block mb-3 text-lg">模型评测与量化分析</strong>
-                                <p>主导 Agent 任务的模型评测。通过 GSB 对比法评测模型训练前后表现，直观量化提升幅度，为模型迭代提供明确数据支撑。精通模型量化流程与质量监控标准，能够从海量数据中提取核心反馈点。</p>
+                <div class="md:col-span-8 space-y-12 md:space-y-16">
+                    <div class="space-y-6 md:space-y-8">
+                        <h5 class="serif text-2xl md:text-3xl font-bold flex items-center justify-center md:justify-start"><i data-lucide="zap" class="w-6 h-6 md:w-8 md:h-8 mr-3 md:mr-4 text-yellow-500"></i> 个人优势</h5>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 text-sm text-gray-600 leading-relaxed">
+                            <div class="p-6 md:p-8 glass border border-white/60 rounded-2xl md:rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+                                <strong class="text-gray-900 block mb-2 md:mb-3 text-base md:text-lg">🌟 AI领域深耕</strong>
+                                <p>文章多次登「人人都是产品经理」首页、公众号推文点击量1w+。</p>
                             </div>
-                            <div class="p-8 glass border border-white/60 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-                                <strong class="text-gray-900 block mb-3 text-lg">丰富的模型训练经验</strong>
-                                <p>主导多模态文生图、网页摘要训练等核心项目。熟悉 4w+ 级数据标注、清洗及质检全流程，能够精准拆解并满足算法端复杂的训练数据需求，确保数据集在训练中的高转化率与有效性。</p>
+                            <div class="p-6 md:p-8 glass border border-white/60 rounded-2xl md:rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+                                <strong class="text-gray-900 block mb-2 md:mb-3 text-base md:text-lg">📊 模型评测与训练</strong>
+                                <p>主导 Agent评测、多模态文生图训练等核心项目。</p>
                             </div>
-                            <div class="p-8 glass border border-white/60 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-                                <strong class="text-gray-900 block mb-3 text-lg">前沿技术应用 (Vibe-Coding)</strong>
-                                <p>熟练掌握 LoRA 微调与 Vibe-Coding 技术。利用前沿 AI 协助手段（如 Cursor 等工具），大幅提升数据处理、图像质检与模型反馈的人效比，加速业务迭代与模型能力的实质提升。</p>
+                            <div class="p-6 md:p-8 glass border border-white/60 rounded-2xl md:rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+                                <strong class="text-gray-900 block mb-2 md:mb-3 text-base md:text-lg">👥 团队管理与协调能力</strong>
+                                <p>从一线标注成长为项目组长，保持高质量数据交付。</p>
                             </div>
-                            <div class="p-8 glass border border-white/60 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-                                <strong class="text-gray-900 block mb-3 text-lg">团队协调与管理能力</strong>
-                                <p>具备组长管理经验，能根据交付周期科学制定人效标准。在保障高质交付的同时，有效协调团队成员解决标注一致性、质量波动等业务难题，确保大型项目按期高质通过验收。</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-10">
-                        <h5 class="serif text-3xl font-bold flex items-center"><i data-lucide="briefcase" class="w-8 h-8 mr-4 text-blue-500"></i> 工作经历</h5>
-                        <div class="relative border-l-2 border-gray-200 pl-10 ml-4 space-y-12">
-                            <div class="relative">
-                                <div class="absolute -left-[49px] top-1 w-6 h-6 bg-blue-100 rounded-full border-4 border-white shadow-sm"></div>
-                                <div class="flex flex-col md:flex-row md:justify-between md:items-end mb-4">
-                                    <h6 class="font-bold text-gray-900 text-2xl">上海蓝盟网络技术有限公司</h6>
-                                    <span class="text-sm font-mono text-gray-400 mt-2 md:mt-0 bg-white/60 px-3 py-1 rounded-full border border-gray-100">2024.06 - 2026.03</span>
-                                </div>
-                                <p class="text-base text-blue-600 font-bold mb-4 italic uppercase tracking-wider">AI 训练师 & 模型评测</p>
-                                <p class="text-base text-gray-600 leading-relaxed mb-4 font-light">主导 360AI 浏览器全线 Agent 的模型评测工作，并负责 AI 绘图工具的多模态文生图训练项目。运用 Vibe-Coding 与 LoRA 微调显著优化模型表现。期间发表 AI 趋势分析文章获知名公众号转发，点击量破万。</p>
-                            </div>
-                            <div class="relative">
-                                <div class="absolute -left-[49px] top-1 w-6 h-6 bg-gray-100 rounded-full border-4 border-white shadow-sm"></div>
-                                <div class="flex flex-col md:flex-row md:justify-between md:items-end mb-4">
-                                    <h6 class="font-bold text-gray-900 text-2xl">上海前善办公设备有限公司</h6>
-                                    <span class="text-sm font-mono text-gray-400 mt-2 md:mt-0 bg-white/60 px-3 py-1 rounded-full border border-gray-100">2023.08 - 2024.06</span>
-                                </div>
-                                <p class="text-base text-gray-400 font-bold mb-4 italic uppercase tracking-wider">视觉设计</p>
-                                <p class="text-base text-gray-600 leading-relaxed font-light">负责家居类产品 3D 建模渲染、动态视频制作，并独立完成亚马逊平台全案视觉设计与高转化排版。</p>
+                            <div class="p-6 md:p-8 glass border border-white/60 rounded-2xl md:rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+                                <strong class="text-gray-900 block mb-2 md:mb-3 text-base md:text-lg">⚡ 掌握LoRA微调、Vibe-Coding</strong>
+                                <p>熟练 LoRA 微调、Vibe-Coding提效。</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="space-y-8 pt-6">
-                        <h5 class="serif text-2xl font-bold flex items-center"><i data-lucide="award" class="w-6 h-6 mr-4 text-red-500"></i> 技能与成就</h5>
-                        <div class="flex flex-wrap gap-3">
-                            <span class="px-4 py-2 bg-white border border-gray-100 rounded-xl text-sm font-medium shadow-sm hover:border-gray-300 transition-colors cursor-default">平面设计师岗位证书</span>
-                            <span class="px-4 py-2 bg-white border border-gray-100 rounded-xl text-sm font-medium shadow-sm hover:border-gray-300 transition-colors cursor-default">CAD 工程师岗位证书</span>
-                            <span class="px-4 py-2 bg-white border border-gray-100 rounded-xl text-sm font-medium shadow-sm hover:border-gray-300 transition-colors cursor-default">计算机二级证书</span>
-                            <span class="px-4 py-2 bg-white border border-gray-100 rounded-xl text-sm font-medium shadow-sm hover:border-gray-300 transition-colors cursor-default">办公自动化应用证书</span>
-                            <span class="px-4 py-2 bg-red-50 text-red-600 border border-red-100 rounded-xl text-sm font-bold shadow-sm">人人都是产品经理首页热门推荐作者</span>
+                    <div class="space-y-8 md:space-y-10">
+                        <h5 class="serif text-2xl md:text-3xl font-bold flex items-center justify-center md:justify-start"><i data-lucide="briefcase" class="w-6 h-6 md:w-8 md:h-8 mr-3 md:mr-4 text-blue-500"></i> 工作经历</h5>
+                        <div class="relative border-l-2 border-gray-200 pl-6 md:pl-10 ml-2 md:ml-4 space-y-10 md:space-y-12">
+                            <div class="relative">
+                                <div class="absolute -left-[35px] md:-left-[49px] top-1 w-5 h-5 md:w-6 md:h-6 bg-blue-100 rounded-full border-4 border-white shadow-sm"></div>
+                                <div class="flex flex-col md:flex-row md:justify-between md:items-end mb-3 md:mb-4">
+                                    <h6 class="font-bold text-gray-900 text-xl md:text-2xl">上海蓝盟网络技术有限公司</h6>
+                                    <span class="text-xs md:text-sm font-mono text-gray-400 mt-1 md:mt-0 bg-white/60 px-3 py-1 rounded-full border border-gray-100 self-start md:self-auto">2024.06 - 2026.03</span>
+                                </div>
+                                <p class="text-sm md:text-base text-blue-600 font-bold mb-3 md:mb-4 italic uppercase tracking-wider">AI 训练师 & 模型评测</p>
+                                <p class="text-sm md:text-base text-gray-600 leading-relaxed font-light">主导 360AI 浏览器全线 Agent 的模型评测工作，并负责 AI 绘图工具的多模态文生图训练项目。运用 Vibe-Coding 与 LoRA 微调显著优化模型表现。期间发表 AI 趋势分析文章获知名公众号转发，点击量破万。</p>
+                            </div>
+                            <div class="relative">
+                                <div class="absolute -left-[35px] md:-left-[49px] top-1 w-5 h-5 md:w-6 md:h-6 bg-gray-100 rounded-full border-4 border-white shadow-sm"></div>
+                                <div class="flex flex-col md:flex-row md:justify-between md:items-end mb-3 md:mb-4">
+                                    <h6 class="font-bold text-gray-900 text-xl md:text-2xl">上海前善办公设备有限公司</h6>
+                                    <span class="text-xs md:text-sm font-mono text-gray-400 mt-1 md:mt-0 bg-white/60 px-3 py-1 rounded-full border border-gray-100 self-start md:self-auto">2023.08 - 2024.06</span>
+                                </div>
+                                <p class="text-sm md:text-base text-gray-400 font-bold mb-3 md:mb-4 italic uppercase tracking-wider">视觉设计</p>
+                                <p class="text-sm md:text-base text-gray-600 leading-relaxed font-light">负责家居类产品 3D 建模渲染、动态视频制作，并独立完成亚马逊平台全案视觉设计与高转化排版。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6 md:space-y-8 pt-4 md:pt-6">
+                        <h5 class="serif text-xl md:text-2xl font-bold flex items-center justify-center md:justify-start"><i data-lucide="award" class="w-5 h-5 md:w-6 md:h-6 mr-3 md:mr-4 text-red-500"></i> 技能与成就</h5>
+                        <div class="flex flex-wrap gap-2 md:gap-3 justify-center md:justify-start">
+                            <span class="px-3 md:px-4 py-1.5 md:py-2 bg-white border border-gray-100 rounded-xl text-xs md:text-sm font-medium shadow-sm cursor-default">平面设计师岗位证书</span>
+                            <span class="px-3 md:px-4 py-1.5 md:py-2 bg-white border border-gray-100 rounded-xl text-xs md:text-sm font-medium shadow-sm cursor-default">CAD 工程师岗位证书</span>
+                            <span class="px-3 md:px-4 py-1.5 md:py-2 bg-white border border-gray-100 rounded-xl text-xs md:text-sm font-medium shadow-sm cursor-default">计算机二级证书</span>
+                            <span class="px-3 md:px-4 py-1.5 md:py-2 bg-white border border-gray-100 rounded-xl text-xs md:text-sm font-medium shadow-sm cursor-default">办公自动化应用证书</span>
+                            <span class="px-3 md:px-4 py-1.5 md:py-2 bg-red-50 text-red-600 border border-red-100 rounded-xl text-xs md:text-sm font-bold shadow-sm">人人都是产品经理热门作者</span>
                         </div>
                     </div>
                 </div>
@@ -465,47 +542,88 @@
         </section>
 
         <!-- 8. 走心小彩蛋 -->
-        <section id="easter-egg" class="py-[150px] relative flex flex-col items-center justify-center border-t border-gray-200/50">
-            <div class="text-center space-y-4 mb-16 relative z-20">
-                <span class="inline-block px-4 py-1 bg-gradient-to-r from-pink-50 to-purple-50 text-purple-600 border border-purple-100 rounded-full text-xs font-bold tracking-widest uppercase shadow-sm">Hidden Surprise!</span>
-                <h3 class="serif text-4xl md:text-5xl font-bold text-gray-900">恭喜你，触发了隐藏小彩蛋！</h3>
+        <section id="easter-egg" class="py-[100px] md:py-[150px] relative flex flex-col items-center justify-center border-t border-gray-200/50">
+            <div class="text-center space-y-3 md:space-y-4 mb-12 md:mb-16 relative z-20">
+                <span class="inline-block px-4 py-1 bg-gradient-to-r from-pink-50 to-purple-50 text-purple-600 border border-purple-100 rounded-full text-[10px] md:text-xs font-bold tracking-widest uppercase shadow-sm">Hidden Surprise!</span>
+                <h3 class="serif text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">恭喜你，触发隐藏彩蛋！</h3>
             </div>
 
-            <div class="relative cursor-pointer mb-20 select-none inline-block group" id="surprise-photo-container">
-                <div class="easter-bubble eb-1 glass border border-white/80 rounded-2xl px-5 py-3 flex items-center space-x-3 shadow-xl whitespace-nowrap">
-                    <span class="text-3xl">🎉</span><span class="text-sm font-bold text-gray-700">今天也要开心鸭！</span>
+            <div class="relative cursor-pointer mb-16 md:mb-20 select-none inline-block group" id="surprise-photo-container">
+                <!-- 调整了移动端气泡内边距与字体大小 -->
+                <div class="easter-bubble eb-1 glass border border-white/80 rounded-xl md:rounded-2xl px-3 md:px-5 py-2 md:py-3 flex items-center space-x-2 md:space-x-3 shadow-xl whitespace-nowrap">
+                    <span class="text-xl md:text-3xl">🎉</span><span class="text-xs md:text-sm font-bold text-gray-700">今天也要开心鸭！</span>
                 </div>
-                <div class="easter-bubble eb-2 glass border border-white/80 rounded-2xl px-5 py-3 flex items-center space-x-3 shadow-xl whitespace-nowrap">
-                    <span class="text-3xl">🚀</span><span class="text-sm font-bold text-gray-700">Bug 全部退散！</span>
+                <div class="easter-bubble eb-2 glass border border-white/80 rounded-xl md:rounded-2xl px-3 md:px-5 py-2 md:py-3 flex items-center space-x-2 md:space-x-3 shadow-xl whitespace-nowrap">
+                    <span class="text-xl md:text-3xl">🚀</span><span class="text-xs md:text-sm font-bold text-gray-700">Bug 全部退散！</span>
                 </div>
-                <div class="easter-bubble eb-3 glass border border-white/80 rounded-2xl px-5 py-3 flex items-center space-x-3 shadow-xl whitespace-nowrap">
-                    <span class="text-3xl">🧋</span><span class="text-sm font-bold text-gray-700">喝杯奶茶犒劳自己</span>
+                <div class="easter-bubble eb-3 glass border border-white/80 rounded-xl md:rounded-2xl px-3 md:px-5 py-2 md:py-3 flex items-center space-x-2 md:space-x-3 shadow-xl whitespace-nowrap">
+                    <span class="text-xl md:text-3xl">🧋</span><span class="text-xs md:text-sm font-bold text-gray-700">喝杯奶茶犒劳自己</span>
                 </div>
-                <div class="easter-bubble eb-4 glass border border-white/80 rounded-2xl px-5 py-3 flex items-center space-x-3 shadow-xl whitespace-nowrap">
-                    <span class="text-3xl">✨</span><span class="text-sm font-bold text-gray-700">宇宙级好运发送中</span>
+                <div class="easter-bubble eb-4 glass border border-white/80 rounded-xl md:rounded-2xl px-3 md:px-5 py-2 md:py-3 flex items-center space-x-2 md:space-x-3 shadow-xl whitespace-nowrap">
+                    <span class="text-xl md:text-3xl">✨</span><span class="text-xs md:text-sm font-bold text-gray-700">宇宙级好运发送中</span>
                 </div>
 
-                <div class="relative z-20 w-48 h-48 md:w-56 md:h-56 rounded-full p-[3px] bg-white/20 backdrop-blur-md border border-white/30 shadow-[0_10px_40px_rgba(0,0,0,0.08)] transition-transform duration-300 group-hover:scale-105 group-[.is-popped]:scale-95">
+                <div class="relative z-20 w-40 h-40 md:w-56 md:h-56 rounded-full p-[3px] bg-white/20 backdrop-blur-md border border-white/30 shadow-[0_10px_40px_rgba(0,0,0,0.08)] transition-transform duration-300 group-hover:scale-105 group-[.is-popped]:scale-95">
                     <img src="images/Photo-6.png" alt="生活照" class="w-full h-full rounded-full object-cover border border-white/50" onerror="this.src='https://placehold.co/400x400/eeeeee/999999?text=Smile'">
                 </div>
-                <div class="hint-text absolute -bottom-10 left-1/2 -translate-x-1/2 text-gray-400 text-xs italic font-medium whitespace-nowrap pointer-events-none transition-opacity duration-300 group-[.is-popped]:opacity-0">"点一下试试"</div>
+                <div class="hint-text absolute -bottom-8 md:-bottom-10 left-1/2 -translate-x-1/2 text-gray-400 text-[10px] md:text-xs italic font-medium whitespace-nowrap pointer-events-none transition-opacity duration-300 group-[.is-popped]:opacity-0">"点一下试试"</div>
             </div>
 
-            <div class="max-w-2xl text-center space-y-6 px-6 relative z-20">
-                <p class="text-gray-700 leading-relaxed font-medium text-lg italic text-center">谢谢你愿意看到最后，我的荣幸。</p>
-                <p class="text-lg text-purple-600 font-bold serif italic pt-6 text-center">"不管未来的我们是否会产生交集，<br>都祝你今天的心情，明媚、轻松、且自由！"</p>
+            <div class="max-w-2xl text-center space-y-4 md:space-y-6 px-4 md:px-6 relative z-20">
+                <p class="text-gray-700 leading-relaxed font-medium text-base md:text-lg italic text-center">谢谢你愿意看到最后，我的荣幸。</p>
+                <p class="text-base md:text-lg text-purple-600 font-bold serif italic pt-4 md:pt-6 text-center">"不管未来的我们是否会产生交集，<br>都祝你今天的心情，明媚、轻松、且自由！"</p>
             </div>
         </section>
 
     </main>
 
-    <footer class="py-12 border-t border-gray-200/50 text-center text-sm text-gray-400 relative z-10">
+    <footer class="py-8 md:py-12 border-t border-gray-200/50 text-center text-xs md:text-sm text-gray-400 relative z-10">
         <p>© 2026 周术琼. Designed with Curiosity, Global Mindset & Vibe Coding.</p>
     </footer>
 
     <script>
+        // 初始化 Lucide 图标
         lucide.createIcons();
 
+        // 手机端汉堡菜单逻辑
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenuClose = document.getElementById('mobile-menu-close');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        function toggleMobileMenu() {
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+                void mobileMenu.offsetWidth; // 触发重绘
+                mobileMenu.classList.remove('opacity-0');
+                mobileMenu.classList.add('flex');
+                document.body.classList.add('overflow-hidden');
+            } else {
+                mobileMenu.classList.add('opacity-0');
+                setTimeout(() => {
+                    mobileMenu.classList.add('hidden');
+                    mobileMenu.classList.remove('flex');
+                    document.body.classList.remove('overflow-hidden');
+                }, 300);
+            }
+        }
+
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+        mobileMenuClose.addEventListener('click', toggleMobileMenu);
+        mobileLinks.forEach(link => link.addEventListener('click', toggleMobileMenu));
+
+
+        // 移动端作品集卡片点击翻转（因为手机没有 Hover）
+        document.getElementById('hero-photo-stack').addEventListener('click', function() {
+            this.classList.toggle('is-flipped');
+        });
+        document.querySelectorAll('.stack-trigger').forEach(trigger => {
+            trigger.addEventListener('click', function() {
+                this.classList.toggle('is-flipped');
+            });
+        });
+
+        // 入场动画逻辑
         function runIntro() {
             const screen = document.getElementById('intro-screen');
             const text = document.getElementById('intro-text');
@@ -531,6 +649,7 @@
             });
         }
 
+        // 挂绳卡片物理交互
         const zone = document.getElementById('lanyard-zone');
         const card = document.getElementById('lanyard-card');
         const string = document.getElementById('lanyard-string');
@@ -565,7 +684,9 @@
                 card.style.transform = `translate(-50%, -50%) translate3d(${posX}px, ${posY}px, 0) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
                 const rect = zone.getBoundingClientRect();
                 const cx = rect.width / 2, cy = rect.height / 2;
-                const cardHeight = rect.width * 0.75 * (4/3); 
+                const cardWidth = rect.width * 0.75; // 卡片宽度是容器的75%
+                const cardHeight = cardWidth * (4/3); // 宽高比3:4
+                
                 string.setAttribute('x1', cx); string.setAttribute('y1', -20);
                 string.setAttribute('x2', cx + posX); string.setAttribute('y2', cy - (cardHeight / 2) + posY + 5);
                 requestAnimationFrame(updateLanyardPhysics);
@@ -600,12 +721,20 @@
             zone.addEventListener('mousedown', handleDown);
             window.addEventListener('mousemove', (e) => { if(isDragging) { e.preventDefault(); handleMove(e); } }, {passive: false});
             window.addEventListener('mouseup', handleUp);
-            zone.addEventListener('touchstart', handleDown, {passive: false});
-            window.addEventListener('touchmove', (e) => { if(isDragging) { e.preventDefault(); handleMove(e); } }, {passive: false});
+            // 移动端触摸
+            zone.addEventListener('touchstart', handleDown, {passive: true});
+            window.addEventListener('touchmove', (e) => { 
+                // 仅在拖拽范围内且横向滑动较多时阻止页面滚动，防止影响用户上下滑动页面
+                if(isDragging && Math.abs(e.touches[0].clientX - lastMouseX) > Math.abs(e.touches[0].clientY - lastMouseY)) { 
+                    if(e.cancelable) e.preventDefault(); 
+                } 
+                handleMove(e); 
+            }, {passive: false});
             window.addEventListener('touchend', handleUp);
             requestAnimationFrame(updateLanyardPhysics);
         }
 
+        // 彩蛋逻辑
         const surprisePhoto = document.getElementById('surprise-photo-container');
         if (surprisePhoto) {
             surprisePhoto.addEventListener('click', () => {
